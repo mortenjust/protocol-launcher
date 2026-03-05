@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opening in Obsidian…</title>
+  <title>Opening app…</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -36,45 +36,46 @@
     a.btn:hover { background: #6d28d9; }
     .meta { font-size: 0.8rem; color: #585b70; margin-top: 2rem; }
     .meta a { color: #585b70; }
+    code { background: #313244; padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">💎</div>
-    <h1>Opening in Obsidian…</h1>
-    <p id="info">Redirecting you to your note.</p>
-    <a id="open-btn" class="btn" href="#">Open in Obsidian</a>
+    <div class="icon">🚀</div>
+    <h1 id="title">Opening app…</h1>
+    <p id="info">Redirecting you now.</p>
+    <a id="open-btn" class="btn" href="#">Open</a>
     <div class="meta">
-      <p id="note-path"></p>
-      <p style="margin-top:0.5rem">Paste any <code>obsidian://</code> URL after the domain to open it.<br>
-      <a href="https://github.com/mortenjust/obsidian-launcher">Source</a></p>
+      <p id="target-url"></p>
+      <p style="margin-top:0.5rem">
+        Turns <code>https://</code> links into app deep links.<br>
+        <a href="https://github.com/mortenjust/protocol-launcher">Source</a>
+      </p>
     </div>
   </div>
   <script>
     (function() {
-      // Everything after the first / becomes the obsidian:// URI
-      // e.g. https://domain.com/open?vault=X&file=Y → obsidian://open?vault=X&file=Y
-      const raw = location.pathname.slice(1) + location.search + location.hash;
+      // URL format: https://domain.com/?url=obsidian%3A%2F%2Fopen%3Fvault%3DX%26file%3DY
+      const params = new URLSearchParams(location.search);
+      const targetUrl = params.get('url');
 
-      if (!raw) {
-        document.getElementById('info').textContent = 'Add an Obsidian path after the URL to open a note.';
+      if (!targetUrl) {
+        document.getElementById('title').textContent = 'Protocol Launcher';
+        document.getElementById('info').innerHTML = 'Add <code>?url=</code> with an encoded app URL to launch it.';
         document.getElementById('open-btn').style.display = 'none';
         return;
       }
 
-      const obsidianUrl = 'obsidian://' + raw;
-      const btn = document.getElementById('open-btn');
-      btn.href = obsidianUrl;
+      const protocol = targetUrl.split(':')[0];
+      document.getElementById('title').textContent = 'Opening ' + protocol + '://…';
+      document.getElementById('target-url').textContent = targetUrl;
 
-      // Show the note path
-      const params = new URLSearchParams(location.search);
-      const file = params.get('file');
-      if (file) {
-        document.getElementById('note-path').textContent = file.replace(/%20/g, ' ');
-      }
+      const btn = document.getElementById('open-btn');
+      btn.href = targetUrl;
+      btn.textContent = 'Open in ' + protocol.charAt(0).toUpperCase() + protocol.slice(1);
 
       // Auto-redirect
-      window.location.href = obsidianUrl;
+      window.location.href = targetUrl;
     })();
   </script>
 </body>
