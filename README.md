@@ -1,31 +1,31 @@
 # Obsidian Launcher
 
-A tiny web redirect that opens `obsidian://` URLs from places that don't support custom URI schemes (Discord, Slack, etc.).
+Open Obsidian notes from Discord, Slack, and other platforms that block `obsidian://` custom URI schemes.
 
-## Usage
+## The problem
 
-Append any Obsidian URI path after the domain:
+You want to share a link to an Obsidian note in Discord or Slack, but these platforms strip custom URI schemes. Only `https://` links are clickable.
+
+## The solution
+
+Deploy this tiny redirect service. It takes an `https://` URL and redirects to the equivalent `obsidian://` URL.
 
 ```
 https://yourdomain.com/open?vault=MyVault&file=My%20Note
+                          ↓
+        obsidian://open?vault=MyVault&file=My%20Note
 ```
 
-This redirects to:
-
-```
-obsidian://open?vault=MyVault&file=My%20Note
-```
+Auto-redirects instantly, with a fallback button if the browser blocks it.
 
 ## Deploy
 
-Deploy to Vercel — it's a single static HTML file with a catch-all rewrite.
+One static HTML file. No build step, no dependencies, no server.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mortenjust/obsidian-launcher)
 
-## How it works
+Or deploy anywhere that serves static files — just make sure all paths route to `index.html` (see `vercel.json` for the rewrite rule).
 
-1. Takes everything after the domain as the Obsidian URI path
-2. Prepends `obsidian://`
-3. Auto-redirects (with a fallback button)
+## For AI agents
 
-No server, no dependencies, no build step.
+The `obsidian-launcher/` folder contains an [agent skill](https://github.com/openai/codex) that teaches AI coding agents to generate clickable Obsidian links in chat platforms. Install the skill and set your domain.
