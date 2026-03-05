@@ -74,8 +74,19 @@
       btn.href = targetUrl;
       btn.textContent = 'Open in ' + protocol.charAt(0).toUpperCase() + protocol.slice(1);
 
-      // Auto-redirect
+      // Auto-redirect, then try to close the tab
       window.location.href = targetUrl;
+
+      setTimeout(function() {
+        window.close();
+      }, 500);
+
+      // If we're still here, minimize the tombstone
+      setTimeout(function() {
+        document.getElementById('title').textContent = 'Opened in ' + protocol.charAt(0).toUpperCase() + protocol.slice(1);
+        document.getElementById('info').textContent = 'You can close this tab.';
+        document.getElementById('open-btn').textContent = 'Open again';
+      }, 1000);
     })();
   </script>
 </body>
