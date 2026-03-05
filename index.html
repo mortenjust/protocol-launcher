@@ -3,89 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opening app…</title>
+  <title>Redirecting…</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #1e1e2e;
-      color: #cdd6f4;
+      background: #1a1a1a;
+      color: #666;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      margin: 0;
     }
-    .card {
-      text-align: center;
-      max-width: 420px;
-      padding: 2rem;
-    }
-    .icon { font-size: 3rem; margin-bottom: 1rem; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-    p { color: #a6adc8; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
-    a.btn {
-      display: inline-block;
-      background: #7c3aed;
-      color: #fff;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    a.btn:hover { background: #6d28d9; }
-    .meta { font-size: 0.8rem; color: #585b70; margin-top: 2rem; }
-    .meta a { color: #585b70; }
-    code { background: #313244; padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.85em; }
+    .msg { text-align: center; font-size: 0.85rem; }
+    a { color: #666; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">🚀</div>
-    <h1 id="title">Opening app…</h1>
-    <p id="info">Redirecting you now.</p>
-    <a id="open-btn" class="btn" href="#">Open</a>
-    <div class="meta">
-      <p id="target-url"></p>
-      <p style="margin-top:0.5rem">
-        Turns <code>https://</code> links into app deep links.<br>
-        <a href="https://github.com/mortenjust/protocol-launcher">Source</a>
-      </p>
-    </div>
-  </div>
+  <div class="msg" id="msg"></div>
   <script>
     (function() {
-      // URL format: https://domain.com/?url=obsidian%3A%2F%2Fopen%3Fvault%3DX%26file%3DY
-      const params = new URLSearchParams(location.search);
-      const targetUrl = params.get('url');
-
-      if (!targetUrl) {
-        document.getElementById('title').textContent = 'Protocol Launcher';
-        document.getElementById('info').innerHTML = 'Add <code>?url=</code> with an encoded app URL to launch it.';
-        document.getElementById('open-btn').style.display = 'none';
+      var params = new URLSearchParams(location.search);
+      var url = params.get('url');
+      if (!url) {
+        document.getElementById('msg').textContent = 'Missing ?url= parameter';
         return;
       }
-
-      const protocol = targetUrl.split(':')[0];
-      document.getElementById('title').textContent = 'Opening ' + protocol + '://…';
-      document.getElementById('target-url').textContent = targetUrl;
-
-      const btn = document.getElementById('open-btn');
-      btn.href = targetUrl;
-      btn.textContent = 'Open in ' + protocol.charAt(0).toUpperCase() + protocol.slice(1);
-
-      // Auto-redirect, then try to close the tab
-      window.location.href = targetUrl;
-
+      window.location.href = url;
+      setTimeout(function() { window.close(); }, 500);
       setTimeout(function() {
-        window.close();
-      }, 500);
-
-      // If we're still here, minimize the tombstone
-      setTimeout(function() {
-        document.getElementById('title').textContent = 'Opened in ' + protocol.charAt(0).toUpperCase() + protocol.slice(1);
-        document.getElementById('info').textContent = 'You can close this tab.';
-        document.getElementById('open-btn').textContent = 'Open again';
+        document.getElementById('msg').innerHTML = 'You can close this tab. <a href="' + url + '">Retry</a>';
       }, 1000);
     })();
   </script>
