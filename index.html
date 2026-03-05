@@ -3,37 +3,183 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting…</title>
+  <title id="page-title">Protocol Launcher</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #1a1a1a;
-      color: #666;
+      color: #999;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
     }
-    .msg { text-align: center; font-size: 0.85rem; }
-    a { color: #666; }
+    .landing {
+      max-width: 480px;
+      padding: 2rem;
+    }
+    h1 {
+      color: #ddd;
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      color: #ddd;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: #555; }
+    input[type="text"]::placeholder { color: #555; }
+    button {
+      background: #333;
+      color: #ccc;
+      border: 1px solid #444;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    button:hover { background: #444; }
+    .result {
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #aaa;
+      word-break: break-all;
+      display: none;
+      margin-bottom: 1.5rem;
+      cursor: pointer;
+    }
+    .result:hover { border-color: #555; }
+    .copied {
+      color: #6a6;
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    h2 {
+      color: #888;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    pre {
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.8rem;
+      font-size: 0.8rem;
+      color: #aaa;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    code { font-family: 'SF Mono', Menlo, monospace; }
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #555;
+    }
+    .footer a { color: #666; }
+    .redirect-msg {
+      text-align: center;
+      font-size: 0.85rem;
+      padding: 2rem;
+    }
+    .redirect-msg a { color: #666; }
   </style>
 </head>
 <body>
-  <div class="msg" id="msg"></div>
+  <!-- Redirect mode (has ?url=) -->
+  <div class="redirect-msg" id="redirect" style="display:none"></div>
+
+  <!-- Landing page (no ?url=) -->
+  <div class="landing" id="landing">
+    <h1>Protocol Launcher</h1>
+    <p>Make app deep links clickable on Discord, Slack, and other platforms that block custom URI schemes.</p>
+
+    <label style="font-size:0.8rem;color:#777;display:block;margin-bottom:0.4rem">Paste an app URL</label>
+    <div class="input-row">
+      <input type="text" id="input" placeholder="obsidian://open?vault=My Vault&file=Note">
+      <button id="generate">Create link</button>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="copied" id="copied">Copied to clipboard</div>
+
+    <h2>How it works</h2>
+    <p>Append any app URL as a <code>?url=</code> parameter. The page redirects to it instantly.</p>
+    <pre><code>https://DOMAIN/?url=obsidian%3A%2F%2Fopen%3Fvault%3DX%26file%3DY</code></pre>
+    <p>Works with <code>obsidian://</code>, <code>raycast://</code>, <code>things://</code>, <code>bear://</code>, <code>notion://</code>, <code>shortcuts://</code>, or any other protocol.</p>
+
+    <h2>For AI agents</h2>
+    <p>To generate a launcher URL: URL-encode the full app URI and pass it as the <code>?url=</code> parameter. An <a href="https://github.com/mortenjust/protocol-launcher/tree/main/obsidian-launcher">agent skill</a> is included in the repo for Obsidian links.</p>
+
+    <div class="footer">
+      <a href="https://github.com/mortenjust/protocol-launcher">Source on GitHub</a>
+    </div>
+  </div>
+
   <script>
     (function() {
       var params = new URLSearchParams(location.search);
       var url = params.get('url');
-      if (!url) {
-        document.getElementById('msg').textContent = 'Missing ?url= parameter';
+
+      if (url) {
+        // Redirect mode
+        document.getElementById('landing').style.display = 'none';
+        var el = document.getElementById('redirect');
+        el.style.display = 'block';
+        document.getElementById('page-title').textContent = 'Redirecting…';
+        window.location.href = url;
+        setTimeout(function() { window.close(); }, 500);
+        setTimeout(function() {
+          el.innerHTML = 'You can close this tab. <a href="' + url + '">Retry</a>';
+        }, 1000);
         return;
       }
-      window.location.href = url;
-      setTimeout(function() { window.close(); }, 500);
-      setTimeout(function() {
-        document.getElementById('msg').innerHTML = 'You can close this tab. <a href="' + url + '">Retry</a>';
-      }, 1000);
+
+      // Landing mode — URL generator
+      var input = document.getElementById('input');
+      var result = document.getElementById('result');
+      var copied = document.getElementById('copied');
+
+      document.getElementById('generate').addEventListener('click', function() {
+        var val = input.value.trim();
+        if (!val) return;
+        var launcherUrl = location.origin + '/?url=' + encodeURIComponent(val);
+        result.textContent = launcherUrl;
+        result.style.display = 'block';
+        copied.style.display = 'none';
+      });
+
+      result.addEventListener('click', function() {
+        navigator.clipboard.writeText(result.textContent).then(function() {
+          copied.style.display = 'block';
+          setTimeout(function() { copied.style.display = 'none'; }, 2000);
+        });
+      });
     })();
   </script>
 </body>
